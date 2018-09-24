@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}デモ{% endblock %}
+
+{% block extra_css %}
+{#<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/css/tabulator.min.css" rel="stylesheet">#}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/tabulator.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-10">
+        <div id="example-table"></div>
+    </div>
+</div>
+<div class="row justify-content-center my-3">
+    <div class="col-10">
+        <input type="button" id="download" class="btn btn-primary" value="CSVダウンロード">
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+{#    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/js/tabulator.min.js"></script>#}
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
+
+<script type="text/javascript">
+    // Initialize table
+    Tabulator.extendExtension("format", "formatters", {
+        date: function (cell, formatterParams) {
+            return moment(cell.getValue()).format("YYYY/MM/DD");
+        },
+        percent: function (cell, formatterParams) {
+            return (cell.getValue() * 100).toFixed(2) + "%";
+        },
+    });
+    $("#example-table").tabulator({
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 10,
+        initialSort: [
+            {column: "Date", dir: "desc"},
+        ],
+        columns: [
+            {
+                title: "日付<br>(日本時間)",
+                field: "Date",
+                downloadTitle: "Date",
+                sorter: "string",
+                formatter: "date"
+            },
+            {
+                title: "通貨", field: "Symbol", width: "12%", sorter: "string"
+            },
+            {
+                title: "価格 (ドル)",
+                field: "Price (USD)",
+                sorter: "number",
+                align: "right",
+                formatter: "money",
+                formatterParams: {precision: 2, symbol: "$"}
+            },
+            {
+                title: "ドル/円",
+                field: "USD/JPY",
+                sorter: "number",
+                align: "right",
+                formatter: "money",
+                formatterParams: {precision: 2, symbol: "¥"}
+            },
+            {
+                title: "価格 (円)",
+                field: "Price (JPY)",
+                sorter: "number",
+                align: "right",
+                formatter: "money",
+                formatterParams: {precision: 0, symbol: "¥"}
+            },
+            {
+                title: "円価格上昇率<br>(％)",
+                field: "Price diff rate",
+                sorter: "number",
+                align: "right",
+                formatter: "percent"
+            },
+        ],
+        rowFormatter: function (row) {
+            var data = row.getData();
+            if (data["Price diff rate"] >= 0) {
+                row.getElement().css({"background-color": "#f0fff0"});
+            } else {
+                row.getElement().css({"background-color": "#fff0f5"});
+            }
+        },
+        locale: true,
+        langs: {
+            "ja": {
+                "pagination": {
+                    "first": "|<",
+                    "last": ">|",
+                    "prev": "<",
+                    "next": ">",
+                },
+            }
+        },
+    });
+
+    // Update records
+    $("#example-table").tabulator("setData", "{% url 'prices:history_ajax' %}");
+
+    // Download as CSV
+    $("#download").click(function () {
+        $("#example-table").tabulator("download", "csv", "data.csv");
+    });
+</script>
+{% endblock %}

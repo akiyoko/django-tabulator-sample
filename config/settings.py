@@ -1,5 +1,7 @@
 import os
 
+import environ
+
 
 ###############
 # Build paths #
@@ -12,6 +14,10 @@ PROJECT_NAME = os.path.basename(BASE_DIR)
 #####################
 # Security settings #
 #####################
+
+# Read .env if exists
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = '<fake-secret-key>'
 
@@ -31,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'prices.apps.PricesConfig',
+    'django_extensions',
+    'bootstrap4',
 ]
 
 MIDDLEWARE = [
@@ -167,8 +176,18 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
 
-##################
-# Email settings #
-##################
+##########
+# Caches #
+##########
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
+
+# QUANDL
+
+QUANDL_API_KEY = env('QUANDL_API_KEY')
