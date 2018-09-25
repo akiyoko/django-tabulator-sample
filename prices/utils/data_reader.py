@@ -6,6 +6,8 @@ import pandas as pd
 import requests
 from django.conf import settings
 from django.core.cache import cache
+from .date_utils import DateOfYear
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +30,8 @@ def get_btc_prices():
             urlencode(dict(
                 command='returnChartData',
                 currencyPair='USDT_BTC',
-                start=1514732400,  # 2018/1/1
-                end=9999999999,
+                start=DateOfYear(2018).start_date_unixtime,  # 2018/1/1
+                end=DateOfYear(2018).end_date_unixtime,
                 period=60 * 60 * 24,
             ))
         )
@@ -97,8 +99,12 @@ def get_usd_jpy_prices():
 def get_prices():
     # BTC価格
     df_btc = get_btc_prices()
+    print('df_btc=')
+    print(df_btc)
     # USD/JPY
     df_usd_jpy = get_usd_jpy_prices()
+    print('df_usd_jpy=')
+    print(df_usd_jpy)
 
     # 'Date' をキーにしてマージ
     df = pd.merge(df_btc, df_usd_jpy, on='Date', how='outer')
