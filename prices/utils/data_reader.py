@@ -13,6 +13,7 @@ CACHE_TIMEOUT = 60 * 60 * 3  # 3 hours
 
 
 def get_btc_prices():
+    """Poloniex API を利用して BTC 価格データを取得"""
     start_time = time.time()
 
     key = 'prices:btc'
@@ -53,6 +54,7 @@ def get_btc_prices():
 
 
 def get_usd_jpy_prices():
+    """Quandl API を利用してドル円の日足データを取得"""
     start_time = time.time()
 
     key = 'prices:usd-jpy'

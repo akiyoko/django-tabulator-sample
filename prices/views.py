@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.generic import View
 
-from .utils.datareader import get_prices
+from .utils.data_reader import get_prices
 
 
 class HistoryAjaxView(View):

@@ -29,7 +29,7 @@
         src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
 
 <script type="text/javascript">
-    // Initialize table
+    // カスタムのデータフォーマッターを定義
     Tabulator.extendExtension("format", "formatters", {
         date: function (cell, formatterParams) {
             return moment(cell.getValue()).format("YYYY/MM/DD");
@@ -38,10 +38,13 @@
             return (cell.getValue() * 100).toFixed(2) + "%";
         },
     });
+    // テーブルの初期化
     $("#example-table").tabulator({
         layout: "fitColumns",
         pagination: "local",
+        // 1ページあたり表示件数
         paginationSize: 10,
+        // 初回ソート条件
         initialSort: [
             {column: "Date", dir: "desc"},
         ],
@@ -54,7 +57,10 @@
                 formatter: "date"
             },
             {
-                title: "通貨", field: "Symbol", width: "12%", sorter: "string"
+                title: "通貨",
+                field: "Symbol",
+                width: "12%",
+                sorter: "string"
             },
             {
                 title: "価格 (ドル)",
@@ -86,8 +92,9 @@
                 sorter: "number",
                 align: "right",
                 formatter: "percent"
-            },
+            }
         ],
+        // 行の色分け
         rowFormatter: function (row) {
             var data = row.getData();
             if (data["Price diff rate"] >= 0) {
@@ -99,20 +106,21 @@
         locale: true,
         langs: {
             "ja": {
+                // ページング部品のラベル名を変更
                 "pagination": {
                     "first": "|<",
                     "last": ">|",
                     "prev": "<",
-                    "next": ">",
-                },
+                    "next": ">"
+                }
             }
-        },
+        }
     });
 
-    // Update records
+    // データ更新
     $("#example-table").tabulator("setData", "{% url 'prices:history_ajax' %}");
 
-    // Download as CSV
+    // CSV ダウンロード
     $("#download").click(function () {
         $("#example-table").tabulator("download", "csv", "data.csv");
     });
