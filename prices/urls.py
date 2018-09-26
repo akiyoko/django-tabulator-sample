@@ -11,5 +11,5 @@ urlpatterns = [
     path('', TemplateView.as_view(
         template_name='prices/index.html'), name='index'),
     # path('history_ajax/', cache_page(CACHE_TIMEOUT)(views.history_ajax), name='history_ajax'),
-    path('history_ajax/', views.history_ajax, name='history_ajax'),
+    path('price_history_ajax/', views.price_history_ajax, name='price_history_ajax'),
 ]

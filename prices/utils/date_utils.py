@@ -1,4 +1,5 @@
 from datetime import datetime, time
+
 from django.utils import timezone
 
 
@@ -36,6 +37,30 @@ class DateOfYear:
         return DateOfYear.to_yyyymmdd(self.new_year_datetime)
 
     @property
+    def start_date_yyyymmdd_dash(self):
+        return DateOfYear.to_yyyymmdd_dash(self.start_datetime)
+
+    @property
+    def end_date_yyyymmdd_dash(self):
+        return DateOfYear.to_yyyymmdd_dash(self.end_datetime)
+
+    @property
+    def new_year_date_yyyymmdd_dash(self):
+        return DateOfYear.to_yyyymmdd_dash(self.new_year_datetime)
+
+    @property
+    def start_date_yyyymmdd_slash(self):
+        return DateOfYear.to_yyyymmdd_slash(self.start_datetime)
+
+    @property
+    def end_date_yyyymmdd_slash(self):
+        return DateOfYear.to_yyyymmdd_slash(self.end_datetime)
+
+    @property
+    def new_year_date_yyyymmdd_slash(self):
+        return DateOfYear.to_yyyymmdd_slash(self.new_year_datetime)
+
+    @property
     def start_date_unixtime(self):
         return DateOfYear.to_unixtime(self.start_datetime)
 
@@ -60,6 +85,14 @@ class DateOfYear:
         return dt.strftime('%Y%m%d')
 
     @staticmethod
+    def to_yyyymmdd_dash(dt):
+        return dt.strftime('%Y-%m-%d')
+
+    @staticmethod
+    def to_yyyymmdd_slash(dt):
+        return dt.strftime('%Y/%m/%d')
+
+    @staticmethod
     def to_unixtime(dt):
         return int(dt.timestamp())
 
@@ -67,8 +100,14 @@ class DateOfYear:
 def main():
     date_of_year = DateOfYear(2018)
     assert date_of_year.start_date_yyyymmdd == '20180101'
+    assert date_of_year.start_date_yyyymmdd_dash == '2018-01-01'
+    assert date_of_year.start_date_yyyymmdd_slash == '2018/01/01'
     assert date_of_year.end_date_yyyymmdd == '20181231'
+    assert date_of_year.end_date_yyyymmdd_dash == '2018-12-31'
+    assert date_of_year.end_date_yyyymmdd_slash == '2018/12/31'
     assert date_of_year.new_year_date_yyyymmdd == '20190101'
+    assert date_of_year.new_year_date_yyyymmdd_dash == '2019-01-01'
+    assert date_of_year.new_year_date_yyyymmdd_slash == '2019/01/01'
     assert date_of_year.start_date_unixtime == 1514732400
     assert date_of_year.end_date_unixtime == 1546182000
     assert date_of_year.new_year_date_unixtime == 1546268400

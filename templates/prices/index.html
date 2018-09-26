@@ -10,7 +10,7 @@
 {% block content %}
 <div class="row justify-content-center my-3">
     <div class="col-10">
-        <div id="example-table"></div>
+        <div id="prices-table"></div>
     </div>
 </div>
 <div class="row justify-content-center my-3">
@@ -29,7 +29,7 @@
         src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
 
 <script type="text/javascript">
-    // カスタムのデータフォーマッターを定義
+    // 独自 formatter を定義
     Tabulator.extendExtension("format", "formatters", {
         date: function (cell, formatterParams) {
             return moment(cell.getValue()).format("YYYY/MM/DD");
@@ -39,7 +39,7 @@
         },
     });
     // テーブルの初期化
-    $("#example-table").tabulator({
+    $("#prices-table").tabulator({
         layout: "fitColumns",
         pagination: "local",
         // 1ページあたり表示件数
@@ -117,12 +117,12 @@
         }
     });
 
-    // データ更新
-    $("#example-table").tabulator("setData", "{% url 'prices:history_ajax' %}");
+    // 画面表示後に非同期でデータ更新
+    $("#prices-table").tabulator("setData", "{% url 'prices:price_history_ajax' %}");
 
     // CSV ダウンロード
     $("#download").click(function () {
-        $("#example-table").tabulator("download", "csv", "data.csv");
+        $("#prices-table").tabulator("download", "csv", "data.csv");
     });
 </script>
 {% endblock %}
