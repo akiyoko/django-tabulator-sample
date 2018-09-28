@@ -1,16 +1,33 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}デモ{% endblock %}
 
 {% block extra_css %}
 {#<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/css/tabulator.min.css" rel="stylesheet">#}
+{#<link href="https://cdn.rawgit.com/olifolkerd/tabulator/4.0.1/dist/css/tabulator.min.css" rel="stylesheet">#}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/bootstrap/tabulator_bootstrap4.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center my-3">
     <div class="col-10">
-        <div id="prices-table"></div>
+        <div class="form-check form-check-inline my-3">
+            <input class="form-check-input" type="radio" name="year" id="year2016" value="2016">
+            <label class="form-check-label" for="year2016">2016</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="year" id="year2017" value="2017">
+            <label class="form-check-label" for="year2017">2017</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="year" id="year2018" value="2018">
+            <label class="form-check-label" for="year2018">2018</label>
+        </div>
+    </div>
+    <div class="col-10">
+        <div id="prices-table" class="table-sm"></div>
     </div>
 </div>
 <div class="row justify-content-center my-3">
@@ -21,18 +38,17 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-{#    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/js/tabulator.min.js"></script>#}
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+{#<!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/js/tabulator.min.js"></script>-->#}
+{#<!--<script type="text/javascript" src="https://cdn.rawgit.com/olifolkerd/tabulator/4.0.1/dist/js/tabulator.min.js"></script>-->#}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
 
 <script type="text/javascript">
     // 独自 formatter を定義
     Tabulator.extendExtension("format", "formatters", {
-        date: function (cell, formatterParams) {
-            return moment(cell.getValue()).format("YYYY/MM/DD");
+        datetime: function (cell, formatterParams) {
+            return moment(cell.getValue()).format("YYYY-MM-DD HH:mm");
         },
         percent: function (cell, formatterParams) {
             return (cell.getValue() * 100).toFixed(2) + "%";
@@ -53,8 +69,10 @@
                 title: "日付<br>(日本時間)",
                 field: "Date",
                 downloadTitle: "Date",
+                width: "20%",
                 sorter: "string",
-                formatter: "date"
+                formatter: "datetime"
+                //formatterParams: {outputFormat: "YYYY-MM-DD hh:mm:ss"}
             },
             {
                 title: "通貨",
@@ -119,7 +137,11 @@
 
     // 画面表示後に非同期でデータ更新
     $("#prices-table").tabulator("setData", "{% url 'prices:price_history_ajax' %}");
-
+    // 年を変更すると非同期でデータ更新
+    $("input[name='year']").change(function () {
+        $("#prices-table").tabulator("setData",
+            "{% url 'prices:price_history_ajax' %}", {"year": $(this).val()});
+    });
     // CSV ダウンロード
     $("#download").click(function () {
         $("#prices-table").tabulator("download", "csv", "data.csv");

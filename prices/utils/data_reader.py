@@ -6,8 +6,8 @@ import pandas as pd
 import requests
 from django.conf import settings
 from django.core.cache import cache
-from .date_utils import DateOfYear
 
+from .date_utils import DateOfYear
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def get_btc_prices(year=2018):
     """Poloniex API を利用して BTC 価格データを取得"""
     start_time = time.time()
 
-    key = 'prices:btc:{}'.format(year)
+    key = 'prices:btc-usd:{}'.format(year)
     # キャッシュからデータを取得する
     data = cache.get(key)
 
@@ -30,36 +30,36 @@ def get_btc_prices(year=2018):
             urlencode(dict(
                 command='returnChartData',
                 currencyPair='USDT_BTC',
-                start=DateOfYear(2018).start_date_unixtime,  # 年初の UNIX 時間
-                end=DateOfYear(2018).end_date_unixtime,  # 年末の UNIX 時間
+                start=DateOfYear(year).start_date_unixtime,  # 例：1514732400
+                end=DateOfYear(year).end_date_unixtime,  # 例：1546182000
                 period=60 * 60 * 24,  # 日足データ
             ))
         )
         df = pd.read_json(target_url)
-        df = df.set_index(pd.to_datetime(df['date']))
-        # JST に変換
-        df.index = df.index + pd.DateOffset(hours=9)
-        df['Date'] = pd.to_datetime(df['date'])
+        # Timestamp に変換してタイムゾーンを JST に変更
+        df['Date'] = pd.to_datetime(df['date']).dt.tz_localize('Asia/Tokyo')
+        # 終値を取得
         df['Price (USD)'] = df['close']
         df['Symbol'] = 'BTC'
+        # 列を絞り込む
+        df = df[['Date', 'Price (USD)', 'Symbol']]
 
         # dict のリスト形式でキャッシュに保存
         cache.set(key, df.to_dict(orient='record'), CACHE_TIMEOUT)
     else:
         logger.debug("キャッシュに BTC 価格データが見つかった")
         df = pd.DataFrame.from_dict(data)
-        df = df.set_index(pd.to_datetime(df['date']))
 
     logger.debug("get_btc_prices finished in {:.2f} secs.".format(
         time.time() - start_time))
     return df
 
 
-def get_usd_jpy_prices():
+def get_usd_jpy_prices(year):
     """Quandl API を利用してドル円の日足データを取得"""
     start_time = time.time()
 
-    key = 'prices:usd-jpy'
+    key = 'prices:usd-jpy:{}'.format(year)
     # キャッシュからデータを取得する
     data = cache.get(key)
 
@@ -69,8 +69,8 @@ def get_usd_jpy_prices():
         target_url = '{}?{}'.format(
             'https://www.quandl.com/api/v3/datasets/FRED/DEXJPUS/data.json',
             urlencode(dict(
-                start_date=DateOfYear(2018).start_date_yyyymmdd_dash,  # 2018-01-01
-                end_date=DateOfYear(2018).end_date_yyyymmdd_dash,  # 2018-12-31
+                start_date=DateOfYear(year).start_date_yyyymmdd_dash,  # 例：2018-01-01
+                end_date=DateOfYear(year).end_date_yyyymmdd_dash,  # 例：2018-12-31
                 order='asc',
                 api_key=settings.QUANDL_API_KEY,
             ))
@@ -81,50 +81,47 @@ def get_usd_jpy_prices():
             result,
             columns=['Date', 'USD/JPY'],
         )
-        df = df.set_index(pd.to_datetime(df['Date']))
-        df['Date'] = pd.to_datetime(df['Date'])
+        # Timestamp に変換してタイムゾーンを JST に変更
+        df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize('Asia/Tokyo')
 
         # dict のリスト形式でキャッシュに保存
         cache.set(key, df.to_dict(orient='record'), CACHE_TIMEOUT)
     else:
         logger.debug("キャッシュに USD/JPY データが見つかった")
         df = pd.DataFrame.from_dict(data)
-        df = df.set_index(pd.to_datetime(df['Date']))
 
     logger.debug("get_usd_jpy_prices finished in {:.2f} secs.".format(
         time.time() - start_time))
     return df
 
 
-def get_prices():
-    # BTC価格
-    df_btc = get_btc_prices()
-    print('df_btc=')
-    print(df_btc)
-    # USD/JPY
-    df_usd_jpy = get_usd_jpy_prices()
-    print('df_usd_jpy=')
-    print(df_usd_jpy)
+def get_prices(year):
+    # BTC価格（ドル）
+    df_btc_usd = get_btc_prices(year)
+    # print('df_btc=\n{}'.format(df_btc_usd))
+    # ドル円
+    df_usd_jpy = get_usd_jpy_prices(year)
+    # print('df_usd_jpy=\n{}'.format(df_usd_jpy))
 
     # 'Date' をキーにしてマージ
-    df = pd.merge(df_btc, df_usd_jpy, on='Date', how='outer')
-    # Forward fill する前にソート
-    df['id'] = df.index
-    df = df.sort_values(by=['Date', 'id'])
-    df = df.reset_index(drop=True)
-    # Forward fill で隙間を埋める
-    df['USD/JPY'] = df['USD/JPY'].fillna(method='ffill')
-
+    df = df_btc_usd.merge(df_usd_jpy, on='Date', how='outer')
+    # 日時でソート
+    df = df.sort_values('Date')
+    # 欠損値を穴埋め
+    df['USD/JPY'] = df['USD/JPY'].ffill().bfill()
+    # 価格が存在しない行を削除
+    df = df.dropna(subset=['Price (USD)'])
     # 円換算
     df['Price (JPY)'] = df['Price (USD)'] * df['USD/JPY']
     # 前日からの上昇率を計算
     df['Price diff'] = df['Price (JPY)'] - df['Price (JPY)'].shift(1)
     df['Price diff rate'] = df['Price diff'] / df['Price (JPY)'].shift(1)
 
-    # 価格が存在しないデータを削除
-    df = df.dropna(subset=['Price (USD)'])
-    # df = df[df['Date'].dt.year == 2018]
-    # NaN を 0 に変換
+    # Timestamp 型は JSON シリアライズできないので文字列に変換
+    df['Date'] = df['Date'].dt.strftime('%Y-%m-%d %H:%M:%S%z')
+    # 列を絞り込む
+    df = df[['Date', 'Symbol', 'Price (USD)', 'USD/JPY', 'Price (JPY)', 'Price diff rate']]
+    # （初日の上昇率などの値が NaN になるため）NaN を 0 に変換
     df = df.fillna(0)
 
     return df
