@@ -6,8 +6,8 @@ from .utils.data_reader import get_prices
 
 class PriceHistoryAjaxView(View):
     def get(self, request, *args, **kwargs):
-        # リクエストから年を取得（デフォルトは「2018」）
-        year = int(request.GET.get('year') or 2018)
+        # リクエストから年を取得（デフォルトは 2019）
+        year = int(request.GET.get('year') or 2019)
 
         # BTC価格の一覧を DataFrame で取得
         df = get_prices(year)

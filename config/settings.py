@@ -37,9 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'prices.apps.PricesConfig',
+
+    # 3rd party apps
     'django_extensions',
     'bootstrap4',
+
+    # My applications
+    'prices.apps.PricesConfig',
 ]
 
 MIDDLEWARE = [
@@ -189,5 +193,4 @@ CACHES = {
 
 
 # QUANDL
-
 QUANDL_API_KEY = env('QUANDL_API_KEY')

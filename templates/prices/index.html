@@ -4,147 +4,156 @@
 {% block title %}デモ{% endblock %}
 
 {% block extra_css %}
-{#<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/css/tabulator.min.css" rel="stylesheet">#}
-{#<link href="https://cdn.rawgit.com/olifolkerd/tabulator/4.0.1/dist/css/tabulator.min.css" rel="stylesheet">#}
-<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/tabulator.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/bootstrap/tabulator_bootstrap4.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@4.4.1/dist/css/tabulator.min.css"
+      rel="stylesheet">
+<!-- Bootstrap 4 向けのテーマ -->
+<link href="https://unpkg.com/tabulator-tables@4.4.1/dist/css/bootstrap/tabulator_bootstrap4.min.css"
+      rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center my-3">
-    <div class="col-10">
-        <div class="form-check form-check-inline my-3">
-            <input class="form-check-input" type="radio" name="year" id="year2016" value="2016">
-            <label class="form-check-label" for="year2016">2016</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="year" id="year2017" value="2017">
-            <label class="form-check-label" for="year2017">2017</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="year" id="year2018" value="2018">
-            <label class="form-check-label" for="year2018">2018</label>
-        </div>
+  <div class="col-10">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="year" id="year2017"
+             value="2017">
+      <label class="form-check-label" for="year2017">2017</label>
     </div>
-    <div class="col-10">
-        <div id="prices-table" class="table-sm"></div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="year" id="year2018"
+             value="2018">
+      <label class="form-check-label" for="year2018">2018</label>
     </div>
+    <div class="form-check form-check-inline my-3">
+      <input class="form-check-input" type="radio" name="year" id="year2019"
+             value="2019" checked>
+      <label class="form-check-label" for="year2019">2019</label>
+    </div>
+  </div>
+  <div class="col-10">
+    <div id="prices-table" class="table-sm"></div>
+  </div>
 </div>
 <div class="row justify-content-center my-3">
-    <div class="col-10">
-        <input type="button" id="download" class="btn btn-primary" value="CSVダウンロード">
-    </div>
+  <div class="col-10">
+    <input type="button" id="download" class="btn btn-primary"
+           value="CSVダウンロード">
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
-{#<!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.0.0/js/tabulator.min.js"></script>-->#}
-{#<!--<script type="text/javascript" src="https://cdn.rawgit.com/olifolkerd/tabulator/4.0.1/dist/js/tabulator.min.js"></script>-->#}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
-
+<script src="https://unpkg.com/moment@2.24.0/min/moment.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@4.4.1/dist/js/tabulator.min.js"></script>
 <script type="text/javascript">
-    // 独自 formatter を定義
-    Tabulator.extendExtension("format", "formatters", {
-        datetime: function (cell, formatterParams) {
-            return moment(cell.getValue()).format("YYYY-MM-DD HH:mm");
-        },
-        percent: function (cell, formatterParams) {
-            return (cell.getValue() * 100).toFixed(2) + "%";
-        },
-    });
-    // テーブルの初期化
-    $("#prices-table").tabulator({
-        layout: "fitColumns",
-        pagination: "local",
-        // 1ページあたり表示件数
-        paginationSize: 10,
-        // 初回ソート条件
-        initialSort: [
-            {column: "Date", dir: "desc"},
-        ],
-        columns: [
-            {
-                title: "日付<br>(日本時間)",
-                field: "Date",
-                downloadTitle: "Date",
-                width: "20%",
-                sorter: "string",
-                formatter: "datetime"
-                //formatterParams: {outputFormat: "YYYY-MM-DD hh:mm:ss"}
-            },
-            {
-                title: "通貨",
-                field: "Symbol",
-                width: "12%",
-                sorter: "string"
-            },
-            {
-                title: "価格 (ドル)",
-                field: "Price (USD)",
-                sorter: "number",
-                align: "right",
-                formatter: "money",
-                formatterParams: {precision: 2, symbol: "$"}
-            },
-            {
-                title: "ドル/円",
-                field: "USD/JPY",
-                sorter: "number",
-                align: "right",
-                formatter: "money",
-                formatterParams: {precision: 2, symbol: "¥"}
-            },
-            {
-                title: "価格 (円)",
-                field: "Price (JPY)",
-                sorter: "number",
-                align: "right",
-                formatter: "money",
-                formatterParams: {precision: 0, symbol: "¥"}
-            },
-            {
-                title: "円価格上昇率<br>(％)",
-                field: "Price diff rate",
-                sorter: "number",
-                align: "right",
-                formatter: "percent"
-            }
-        ],
-        // 行の色分け
-        rowFormatter: function (row) {
-            var data = row.getData();
-            if (data["Price diff rate"] >= 0) {
-                row.getElement().css({"background-color": "#f0fff0"});
-            } else {
-                row.getElement().css({"background-color": "#fff0f5"});
-            }
-        },
-        locale: true,
-        langs: {
-            "ja": {
-                // ページング部品のラベル名を変更
-                "pagination": {
-                    "first": "|<",
-                    "last": ">|",
-                    "prev": "<",
-                    "next": ">"
-                }
-            }
-        }
-    });
+  // 独自 formatter を定義
+  Tabulator.prototype.extendModule("format", "formatters", {
+    // パーセント表示
+    percent: function (cell, formatterParams) {
+      return (cell.getValue() * 100).toFixed(2) + "%"
+    },
+  });
 
+  // テーブルの初期化
+  var table = new Tabulator("#prices-table", {
+    layout: "fitColumns",
     // 画面表示後に非同期でデータ更新
-    $("#prices-table").tabulator("setData", "{% url 'prices:price_history_ajax' %}");
-    // 年を変更すると非同期でデータ更新
-    $("input[name='year']").change(function () {
-        $("#prices-table").tabulator("setData",
-            "{% url 'prices:price_history_ajax' %}", {"year": $(this).val()});
-    });
-    // CSV ダウンロード
-    $("#download").click(function () {
-        $("#prices-table").tabulator("download", "csv", "data.csv");
-    });
+    ajaxURL: "{% url 'prices:price_history_ajax' %}",
+    pagination: "local",
+    // 1ページあたりの表示件数
+    paginationSize: 10,
+    // 初回ソート条件
+    initialSort: [
+      { column: "Date", dir: "desc" },
+    ],
+    columns: [
+      {
+        title: "日付<br>(日本時間)",
+        field: "Date",
+        width: "20%",
+        sorter: "string",
+        formatter: "datetime",
+        formatterParams: { outputFormat: "YYYY/MM/DD hh:mm:ss" }
+      },
+      {
+        title: "通貨",
+        field: "Symbol",
+        width: "12%",
+        sorter: "string"
+      },
+      {
+        title: "価格 (ドル)",
+        field: "Price (USD)",
+        sorter: "number",
+        align: "right",
+        formatter: "money",
+        formatterParams: { precision: 2, symbol: "$" }
+      },
+      {
+        title: "ドル/円",
+        field: "USD/JPY",
+        sorter: "number",
+        align: "right",
+        formatter: "money",
+        formatterParams: { precision: 2, symbol: "¥" }
+      },
+      {
+        title: "価格 (円)",
+        field: "Price (JPY)",
+        sorter: "number",
+        align: "right",
+        formatter: "money",
+        formatterParams: { precision: 0, symbol: "¥" }
+      },
+      {
+        title: "円価格上昇率<br>(％)",
+        field: "Price diff rate",
+        sorter: "number",
+        align: "right",
+        formatter: "percent"
+      }
+    ],
+    // 行の色分け（円価格上昇率がプラスなら緑、マイナスなら赤）
+    rowFormatter: function (row) {
+      var data = row.getData()
+      if (data["Price diff rate"] >= 0) {
+        row.getElement().style.backgroundColor = "#f0fff0"
+      } else {
+        row.getElement().style.backgroundColor = "#fff0f5"
+      }
+    },
+    // CSV ダウンロード時の出力変換
+    downloadDataFormatter: function (data) {
+      data.data.forEach(function (row) {
+        row["Date"] = moment(row["Date"]).format("YYYY/MM/DD HH:mm")
+      })
+      return data
+    },
+    // ページング部品のラベル名を変更
+    locale: true,
+    langs: {
+      "ja": {
+        "pagination": {
+          "first": "|<",
+          "last": ">|",
+          "prev": "<",
+          "next": ">"
+        }
+      }
+    }
+  })
+
+  // 年を変更すると非同期でデータ更新
+  $("input[name=\'year\']").change(function () {
+    table.setData(
+      "{% url 'prices:price_history_ajax' %}",
+      { "year": $(this).val() }
+    )
+  })
+
+  // CSV ダウンロード
+  $("#download").click(function () {
+    table.download("csv", "data.csv")
+  })
 </script>
 {% endblock %}
