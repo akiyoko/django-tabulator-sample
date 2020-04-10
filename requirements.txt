@@ -1,8 +1,8 @@
-Django==2.2.5
-django-bootstrap4==1.0.1
-django-environ==0.4.5
-django-extensions==2.2.1
-requests==2.22.0
-numpy==1.17.2
-pandas==0.25.1
-python-memcached==1.59
+Django==2.2.*
+django-bootstrap4==1.1.*
+django-environ==0.4.*
+django-extensions==2.2.*
+requests==2.23.*
+numpy==1.18.*
+pandas==1.0.*
+python-memcached==1.59.*

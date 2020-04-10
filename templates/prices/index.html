@@ -4,10 +4,10 @@
 {% block title %}デモ{% endblock %}
 
 {% block extra_css %}
-<link href="https://unpkg.com/tabulator-tables@4.4.1/dist/css/tabulator.min.css"
+<link href="https://unpkg.com/tabulator-tables@4.6.1/dist/css/tabulator.min.css"
       rel="stylesheet">
 <!-- Bootstrap 4 向けのテーマ -->
-<link href="https://unpkg.com/tabulator-tables@4.4.1/dist/css/bootstrap/tabulator_bootstrap4.min.css"
+<link href="https://unpkg.com/tabulator-tables@4.6.1/dist/css/bootstrap/tabulator_bootstrap4.min.css"
       rel="stylesheet">
 {% endblock %}
 
@@ -15,19 +15,19 @@
 <div class="row justify-content-center my-3">
   <div class="col-10">
     <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="year" id="year2017"
-             value="2017">
-      <label class="form-check-label" for="year2017">2017</label>
-    </div>
-    <div class="form-check form-check-inline">
       <input class="form-check-input" type="radio" name="year" id="year2018"
              value="2018">
       <label class="form-check-label" for="year2018">2018</label>
     </div>
     <div class="form-check form-check-inline my-3">
       <input class="form-check-input" type="radio" name="year" id="year2019"
-             value="2019" checked>
+             value="2019">
       <label class="form-check-label" for="year2019">2019</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="year" id="year2020"
+             value="2020" checked>
+      <label class="form-check-label" for="year2020">2020</label>
     </div>
   </div>
   <div class="col-10">
@@ -44,7 +44,7 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/moment@2.24.0/min/moment.min.js"></script>
-<script src="https://unpkg.com/tabulator-tables@4.4.1/dist/js/tabulator.min.js"></script>
+<script src="https://unpkg.com/tabulator-tables@4.6.1/dist/js/tabulator.min.js"></script>
 <script type="text/javascript">
   // 独自 formatter を定義
   Tabulator.prototype.extendModule("format", "formatters", {

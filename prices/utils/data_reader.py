@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 CACHE_TIMEOUT = 60 * 60 * 3  # 3 hours
 
 
-def get_btc_prices(year=2019):
+def get_btc_prices(year=2020):
     """Poloniex API を利用して BTC 価格データを取得"""
     start_time = time.time()
 
@@ -30,9 +30,9 @@ def get_btc_prices(year=2019):
             urlencode(dict(
                 command='returnChartData',
                 currencyPair='USDT_BTC',
-                start=DateOfYear(year).start_date_unixtime,  # 例：1546268400
-                end=DateOfYear(year).end_date_unixtime,      # 例：1577718000
-                period=60 * 60 * 24,  # 日足データ
+                start=DateOfYear(year).start_date_unixtime,  # 例：1577804400
+                end=DateOfYear(year).end_date_unixtime,      # 例：1609340400
+                period=60 * 60 * 24,                         # 日足データ
             ))
         )
         df = pd.read_json(target_url)
@@ -69,8 +69,8 @@ def get_usd_jpy_prices(year):
         target_url = '{}?{}'.format(
             'https://www.quandl.com/api/v3/datasets/FRED/DEXJPUS/data.json',
             urlencode(dict(
-                start_date=DateOfYear(year).start_date_yyyymmdd_dash, # 2019-01-01
-                end_date=DateOfYear(year).end_date_yyyymmdd_dash,     # 2019-12-31
+                start_date=DateOfYear(year).start_date_yyyymmdd_dash, # 2020-01-01
+                end_date=DateOfYear(year).end_date_yyyymmdd_dash,     # 2020-12-31
                 order='asc',
                 api_key=settings.QUANDL_API_KEY,
             ))
